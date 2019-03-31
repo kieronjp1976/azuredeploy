@@ -1,6 +1,8 @@
 
 ##my own file made form lots of others i found. This is working but needs refinement.
 
+## This needs to import and use computer management dsc to rename the server. Also needs to auto reboot after AD isntall. DNS needs to be configured preoperly 
+
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 Install-Module -Name xActiveDirectory
 Install-Module -Name xnetworking
