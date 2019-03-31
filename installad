@@ -1,5 +1,12 @@
 
-//my own file made form lots of others i found. This is working but needs refinement.
+##my own file made form lots of others i found. This is working but needs refinement.
+
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+Install-Module -Name xActiveDirectory
+Install-Module -Name xnetworking
+Install-Module -Name xpendingreboot
+
+
 
 
 $ConfigurationData = @{
@@ -30,7 +37,7 @@ Configuration InstallAD {
         {            
             ActionAfterReboot = 'ContinueConfiguration'            
             ConfigurationMode = 'ApplyOnly'            
-            RebootNodeIfNeeded = $true            
+            RebootNodeIfNeeded = $true           
         } 
 
         WindowsFeature DNS 
