@@ -3,10 +3,11 @@
 
 ## This needs to import and use computer management dsc to rename the server. Also needs to auto reboot after AD isntall. DNS needs to be configured preoperly 
 
-Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 Install-Module -Name xActiveDirectory
 Install-Module -Name xnetworking
 Install-Module -Name xpendingreboot
+Install-Module -Name ComputerManagementDsc
 
 
 
@@ -28,18 +29,26 @@ Configuration InstallAD {
 
 
 
-    Import-DscResource -ModuleName xActiveDirectory, xNetworking, xPendingReboot, PSDesiredStateConfiguration
+    Import-DscResource -ModuleName xActiveDirectory, xNetworking, xPendingReboot, PSDesiredStateConfiguration, ComputerManagementDsc
     $pwd = ConvertTo-SecureString "Test12345!1" -AsPlainText -Force
     $creds = New-Object System.Management.Automation.PSCredential ("Administrator", $pwd)
     
 
     node $AllNodes.NodeName
     {
+        xPendingReboot Reboot1 
+        {  
+            Name = ‘BeforeSoftwareInstall’ 
+        }
         LocalConfigurationManager            
         {            
             ActionAfterReboot = 'ContinueConfiguration'            
             ConfigurationMode = 'ApplyOnly'            
             RebootNodeIfNeeded = $true           
+        }
+        Computer NewName
+        {
+            Name = 'DC01'
         } 
 
         WindowsFeature DNS 
@@ -74,6 +83,10 @@ Configuration InstallAD {
             DomainMode                    = $Node.DFL
             ##DependsOn = "[WindowsFeature]AD-Domain-Services"
             
+        }
+        xPendingReboot Reboot1 
+        {  
+            Name = ‘AfterSoftwareInstall’ 
         }
        
 }
