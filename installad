@@ -1,0 +1,85 @@
+
+//my own file made form lots of others i found. This is working but needs refinement.
+
+
+$ConfigurationData = @{
+    AllNodes = @(
+        @{
+            NodeName                    = 'localhost'
+            DFL                         = 'Win2012R2'
+            DomainName                  = 'kptestlab.com'
+            PSDscAllowPlainTextPassword = $true
+        }
+    )
+}
+
+
+Configuration InstallAD {
+
+
+
+
+    Import-DscResource -ModuleName xActiveDirectory, xNetworking, xPendingReboot, PSDesiredStateConfiguration
+    $pwd = ConvertTo-SecureString "Test12345!1" -AsPlainText -Force
+    $creds = New-Object System.Management.Automation.PSCredential ("Administrator", $pwd)
+    
+
+    node $AllNodes.NodeName
+    {
+        LocalConfigurationManager            
+        {            
+            ActionAfterReboot = 'ContinueConfiguration'            
+            ConfigurationMode = 'ApplyOnly'            
+            RebootNodeIfNeeded = $true            
+        } 
+
+        WindowsFeature DNS 
+        { 
+            Ensure = "Present" 
+            Name = "DNS"
+        }
+        ##xDnsServerAddress DnsServerAddress 
+        ###{ 
+          ##  Address        = '127.0.0.1' 
+          #  InterfaceAlias = 'Ethernet2'
+           # AddressFamily  = 'IPv4'
+            #DependsOn = "[WindowsFeature]DNS"
+       # }
+
+        WindowsFeature RSAT
+        {
+            Ensure = "Present"
+            Name = "RSAT"
+        }
+
+        WindowsFeature ADDSInstall 
+        { 
+            Ensure = "Present" 
+            Name = "AD-Domain-Services"
+        }  
+        xADDomain build
+        {
+            DomainName                    = $Node.DomainName
+            DomainAdministratorCredential = $creds
+            SafemodeAdministratorPassword = $creds
+            DomainMode                    = $Node.DFL
+            ##DependsOn = "[WindowsFeature]AD-Domain-Services"
+            
+        }
+       
+}
+        
+   }
+
+
+
+
+
+
+
+
+##$cred = Get-Credential -UserName contoso\genericuser -Message "Password please"
+##installad -DomainAdministratorCredential $cred -ConfigurationData $cd
+
+
+installad -configuration $configurationdata -outputpath c:\temp\installad ##creates the files
