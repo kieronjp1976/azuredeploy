@@ -36,15 +36,16 @@ Configuration InstallAD {
 
     node $AllNodes.NodeName
     {
-        xPendingReboot Reboot1 
-        {  
-            Name = ‘BeforeSoftwareInstall’ 
-        }
+       
         LocalConfigurationManager            
         {            
             ActionAfterReboot = 'ContinueConfiguration'            
-            ConfigurationMode = 'ApplyOnly'            
+            ConfigurationMode = 'ApplyAndMonitor'            
             RebootNodeIfNeeded = $true           
+        }
+         xPendingReboot Reboot1 
+        {  
+            Name = ‘AfterSoftwareInstall’ 
         }
         Computer NewName
         {
@@ -84,10 +85,7 @@ Configuration InstallAD {
             ##DependsOn = "[WindowsFeature]AD-Domain-Services"
             
         }
-        xPendingReboot Reboot1 
-        {  
-            Name = ‘AfterSoftwareInstall’ 
-        }
+       
        
 }
         
@@ -105,3 +103,5 @@ Configuration InstallAD {
 
 
 installad -configuration $configurationdata -outputpath c:\temp\installad ##creates the files
+set-dsclocalconfigurationmanager -path c:\temp\installad
+Start-DscConfiguration -Wait -Verbose -Path c:\temp\installad\ 
